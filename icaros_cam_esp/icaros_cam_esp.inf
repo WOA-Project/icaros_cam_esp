@@ -1,0 +1,86 @@
+;
+; icaros_cam_esp.inf
+;
+
+[Version]
+Signature="$WINDOWS NT$"
+Class=Sample ; TODO: edit Class
+ClassGuid={78A1C341-4539-11d3-B88D-00C04FAD5171} ; TODO: edit ClassGuid
+Provider=%ManufacturerName%
+CatalogFile=icaros_cam_esp.cat
+DriverVer= ; TODO: set DriverVer in stampinf property pages
+
+[DestinationDirs]
+DefaultDestDir = 12
+icaros_cam_esp_Device_CoInstaller_CopyFiles = 11
+
+; ================= Class section =====================
+
+[ClassInstall32]
+Addreg=SampleClassReg
+
+[SampleClassReg]
+HKR,,,0,%ClassName%
+HKR,,Icon,,-5
+
+[SourceDisksNames]
+1 = %DiskName%,,,""
+
+[SourceDisksFiles]
+icaros_cam_esp.sys  = 1,,
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll=1 ; make sure the number matches with SourceDisksNames
+
+;*****************************************
+; Install Section
+;*****************************************
+
+[Manufacturer]
+%ManufacturerName%=Standard,NT$ARCH$
+
+[Standard.NT$ARCH$]
+%icaros_cam_esp.DeviceDesc%=icaros_cam_esp_Device, Root\icaros_cam_esp ; TODO: edit hw-id
+
+[icaros_cam_esp_Device.NT]
+CopyFiles=Drivers_Dir
+
+[Drivers_Dir]
+icaros_cam_esp.sys
+
+;-------------- Service installation
+[icaros_cam_esp_Device.NT.Services]
+AddService = icaros_cam_esp,%SPSVCINST_ASSOCSERVICE%, icaros_cam_esp_Service_Inst
+
+; -------------- icaros_cam_esp driver install sections
+[icaros_cam_esp_Service_Inst]
+DisplayName    = %icaros_cam_esp.SVCDESC%
+ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
+StartType      = 3               ; SERVICE_DEMAND_START
+ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
+ServiceBinary  = %12%\icaros_cam_esp.sys
+
+;
+;--- icaros_cam_esp_Device Coinstaller installation ------
+;
+
+[icaros_cam_esp_Device.NT.CoInstallers]
+AddReg=icaros_cam_esp_Device_CoInstaller_AddReg
+CopyFiles=icaros_cam_esp_Device_CoInstaller_CopyFiles
+
+[icaros_cam_esp_Device_CoInstaller_AddReg]
+HKR,,CoInstallers32,0x00010000, "WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll,WdfCoInstaller"
+
+[icaros_cam_esp_Device_CoInstaller_CopyFiles]
+WdfCoInstaller$KMDFCOINSTALLERVERSION$.dll
+
+[icaros_cam_esp_Device.NT.Wdf]
+KmdfService =  icaros_cam_esp, icaros_cam_espWDFsect
+[icaros_cam_espWDFsect]
+KmdfLibraryVersion = $KMDFVERSION$
+
+[Strings]
+SPSVCINST_ASSOCSERVICE= 0x00000002
+ManufacturerName="<Your manufacturer name>" ;TODO: Replace with your manufacturer name
+ClassName="Samples" ; TODO: edit ClassName
+DiskName = "icaros_cam_esp Installation Disk"
+icaros_cam_esp.DeviceDesc = "icaros_cam_esp Device"
+icaros_cam_esp.SVCDESC = "icaros_cam_esp Service"
